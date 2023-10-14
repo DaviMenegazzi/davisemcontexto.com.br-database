@@ -6,22 +6,26 @@ const connect = async () => {
   await mongoose.connect(serverURL);
 };
 
-const PostModel = mongoose.model("Post", {
-  title: String,
-  content: String,
-  timestamp: String,
-  upvotes: Number,
-  downvotes: Number,
-  slug: String,
+const postSchema = new mongoose.Schema(
+{
+  title: { type: String, required: true}, 
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now() },
+  upvotes: { type: Number, default: 0, min: 0 },
+  downvotes: { type: Number, default: 0, min: 0 },
+  slug: { type: String, unique: true}
 });
+const Post = mongoose.model("Post", postSchema);
 
-const UserModel = mongoose.model("User", {
-  name: String,
-  pass: String,
+const userSchema = new mongoose.Schema(
+{
+  name: { type: String, unique: true },
+  pass: { type: String, unique: true }
 });
+const User = mongoose.model("User", userSchema);
 
 module.exports = {
-  PostModel: PostModel,
-  UserModel: UserModel,
+  Post: Post,
+  User: User,
   connect: connect,
 };

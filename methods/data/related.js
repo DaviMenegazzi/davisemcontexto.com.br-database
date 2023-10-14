@@ -1,30 +1,20 @@
 const models = require("./models.js");
-const slugify = require("slugify");
+const {v4: uuidv4} = require("uuid");
 
-const currentDate = new Date();
-
-// NOTE: melhorar a forma como o código envia os dados para o servidor
-// NOTE: melhorar os modelos de query
+/**
+ * Cria um documento novo no banco de dados.
+ * @param {*} request 
+ */
 const createPost = async (request) => {
-  let timestamp = currentDate.getTime();
-
-  const newPost = new models.PostModel({
-    title: request.query.title,
-    content: request.query.content,
-    timestamp: timestamp,
-    upvotes: 0,
-    downvotes: 0,
-    slug: slugify(request.query.title),
-  });
-
-  await newPost
-    .save()
+  const newPost = new models.Post(request.query);
+  newPost.slug = uuidv4().slice(0, 6); // adiciona um slug pro objeto
+  await newPost.save()
     .then(() => {
       return true;
     })
     .catch((err) => {
       console.log(err);
-      return false;
+      return err;
     });
 };
 
@@ -32,7 +22,7 @@ const createPost = async (request) => {
  * Retorna todos os posts armazenados no servidor.
  */
 const getPost = async () => {
-  const cursor = models.PostModel.find().cursor();
+  const cursor = models.Post.find().cursor();
   var postList = [];
   try {
     for (
@@ -54,7 +44,7 @@ const getOnlyPost = async (request) => {
   let key = request.query.key;
   let query = {};
   query[key] = request.query.value;
-  let post = await models.PostModel.findOne(query).exec();
+  let post = await models.Post.findOne(query).exec();
 
   const docArray = [];
   docArray.push(post);
@@ -62,19 +52,20 @@ const getOnlyPost = async (request) => {
   return docArray;
 };
 
+/**
+ * Muda o valor dos upvotes ou downvotes
+ * @param {*} request 
+ * @returns Post object
+ */
 const updateRating = async (request) => {
-  let type = request.query.type;
-  let update = {};
-  let post = await models.PostModel.findById(request.query._id).exec();
+  let post = await models.Post.findById(request.query._id).exec();
 
-  console.log(type);
+  let value_to_change = post.toJSON()[request.query.type] + 1;
+  await post.updateOne( {[request.query.type]: value_to_change} ).catch(err => {
+    console.log(err);
+  });
 
-  update[type] = post[type] + 1;
-  await post.updateOne(update);
-
-  let updatedPost = await models.PostModel.findById(request.query._id).exec();
-
-  return updatedPost;
+  return post;
 };
 
 module.exports = {

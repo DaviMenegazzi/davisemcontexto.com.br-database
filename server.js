@@ -31,8 +31,7 @@ app.use(
 app.listen(3000, async function () {
   // conecta ao servidor mongo.
   models.connect();
-
-  console.log("Server running at port 127.0.0.1:3000");
+  console.log("MongoDB RESTful API running.")
 });
 
 app.post(ENDPOINTS.create, async (req, res) => {
@@ -45,7 +44,7 @@ app.get(ENDPOINTS.get, async (req, res) => {
   console.log("performing /get api route");
   let getPostDataPromise = related.getPost().then((postDataList) => {
     if (postDataList != null) {
-      console.log(postDataList);
+      //console.log(postDataList);
       res.send(postDataList);
     }
   });
