@@ -73,6 +73,6 @@ app.post(ENDPOINTS.auth, async (req, res) => {
 
 app.post(ENDPOINTS.update_rating, async (req, res) => {
   console.log("performing /update_rating api route");
-  let updatedPost = related.updateRating(req);
-  res.send({ code: true, data: updatedPost });
+  let response = related.updateRating(req);
+  res.send({ code: response });
 });
